@@ -1,4 +1,4 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+이 프로젝트는 [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app)를 사용하여 [KREAM](https://kream.co.kr/) 모바일웹 일부를 구현한 클론 프로젝트입니다.
 
 ## Getting Started
 
