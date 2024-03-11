@@ -12,3 +12,6 @@ o-dream App은 adc에서 진행하는 부트캠프 프로젝트로 KREAM(https:/
 - Jest
 - pnpm
 - Tailwind CSS
+
+### 화면 설계/분석
+https://miro.com/app/board/uXjVNi15KsQ=/
