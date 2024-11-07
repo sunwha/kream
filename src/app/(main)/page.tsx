@@ -1,4 +1,5 @@
 "use client";
+import PostList from "@/src/components/list/PostList";
 import type { Post, PostResponse } from "@/src/types/post.types";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
@@ -8,6 +9,8 @@ export default function Home() {
   const [postList, setPostList] = useState<Post[]>([]);
   const [selectedTagList, setSelectedTagList] = useState<Post[] | null>(null);
   const tagList = ["ALL", "패션", "스트릿템", "일교차코디"];
+
+  // 게시물 리스트 요청
   const { data, isLoading, refetch } = useQuery({
     queryKey: ["posts"],
     queryFn: async () => {
@@ -18,6 +21,7 @@ export default function Home() {
     },
   });
 
+  // 태그 클릭 이벤트
   const handleTagClick = (tag: string) => {
     if (tag === "ALL") {
       setSelectedTagList(null);
@@ -26,6 +30,16 @@ export default function Home() {
     }
   };
 
+  // 게시물 리스트 요청 성공 시 게시물 리스트 상태 업데이트
+  useEffect(() => {
+    if (!isLoading) {
+      if (data) {
+        setPostList((prev) => [...prev, ...data.posts]);
+      }
+    }
+  }, [isLoading]);
+
+  // 제일 하단까지 스크롤 시 다음 페이지 있을 경우 request 상태 업데이트
   useEffect(() => {
     const handleScroll = () => {
       if (
@@ -40,14 +54,7 @@ export default function Home() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [data]);
 
-  useEffect(() => {
-    if (!isLoading) {
-      if (data) {
-        setPostList((prev) => [...prev, ...data.posts]);
-      }
-    }
-  }, [isLoading]);
-
+  // 제일 하단까지 스크롤 시 다음 페이지 요청
   useEffect(() => {
     async function refetchPosts() {
       const { data } = await refetch();
@@ -74,62 +81,14 @@ export default function Home() {
         {selectedTagList ? (
           <ul>
             {selectedTagList.map((post: Post) => (
-              <li key={post.id}>
-                {post.files.length > 0 ? (
-                  <div>
-                    {post.files.length > 1 && <span>more</span>}
-                    <img
-                      src={post.files[0]?.file_path}
-                      alt={post.title}
-                      width={100}
-                      height={300}
-                    />
-                  </div>
-                ) : (
-                  <div>No Image</div>
-                )}
-                <div>
-                  {post.username} {post.like_count}
-                </div>
-                {post.tags.length > 0 && (
-                  <ul>
-                    {post.tags.map((tag: string, index: number) => (
-                      <li key={index}>#{tag}</li>
-                    ))}
-                  </ul>
-                )}
-              </li>
+              <PostList post={post} />
             ))}
           </ul>
         ) : (
           postList && (
             <ul>
               {postList.map((post: Post) => (
-                <li key={post.id}>
-                  {post.files.length > 0 ? (
-                    <div>
-                      {post.files.length > 1 && <span>more</span>}
-                      <img
-                        src={post.files[0]?.file_path}
-                        alt={post.title}
-                        width={100}
-                        height={300}
-                      />
-                    </div>
-                  ) : (
-                    <div>No Image</div>
-                  )}
-                  <div>
-                    {post.username} {post.like_count}
-                  </div>
-                  {post.tags.length > 0 && (
-                    <ul>
-                      {post.tags.map((tag: string, index: number) => (
-                        <li key={index}>#{tag}</li>
-                      ))}
-                    </ul>
-                  )}
-                </li>
+                <PostList post={post} />
               ))}
             </ul>
           )
