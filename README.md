@@ -7,31 +7,28 @@ Odream App은 adc에서 진행하는 부트캠프 프로젝트로 KREAM(https://
 
 ```mermaid
 gantt
-    section 프로젝트 분석 및 설계 (20%)
-    요구사항 분석 :done, des1, 2023-10-01, 2d
-    기술 스택 결정 :done, des2, after des1, 1d
-    설계 문서 작성 :done, des3, after des2, 2d
-    진척률 산정 :done, des4, after des3, 1d
+    dateFormat  YYYY-MM-DD
+    title Odream App 프로젝트 일정
 
-    section 프론트엔드 개발 (30%)
-    페이지 구조 및 컴포넌트 개발 :active, des5, after des4, 3d
-    UI 스타일링 : des6, after des5, 2d
-    주요 기능 구현 : des7, after des6, 3d
+    section 프로젝트 분석 및 설계
+    기술 스택 결정: done, des1, 2024-02-15, 15d
+    요구사항 분석 및 설계 문서 작성 :done, des2, after des1, 46d
 
-    section 백엔드 개발 (20%)
-    API 개발 및 데이터베이스 연동 : des8, after des7, 3d
-    서버 상태 관리 및 비즈니스 로직 구현 : des9, after des8, 2d
-    인증 및 인가 : des10, after des9, 2d
+    section 프론트엔드 개발
+    페이지 구조 및 컴포넌트 개발 :done, des3, after des2, 27d
+    대기 기간 : done, des4, after des3, 2024-11-06
+    페이지 구조 및 컴포넌트 개발 :active, des4, 2024-11-07, 14d
+    UI 스타일링 : -
+    주요 기능 구현 :-
 
-    section 테스트 및 QA (15%)
-    유닛 테스트 및 통합 테스트 : des11, after des10, 2d
-    QA 및 리뷰 : des12, after des11, 2d
-    버그 수정 및 조정 : des13, after des12, 1d
+    section 테스트 및 QA
+    유닛 테스트 및 통합 테스트 : -
+    버그 수정 및 조정 : -
 
-    section 배포 및 마무리 작업 (15%)
-    배포 환경 세팅 및 배포 : des14, after des13, 2d
-    클라이언트 리뷰 및 최종 조정 : des15, after des14, 1d
-    문서화 및 코드 정리 : des16, after des15, 1d
+    section 배포 및 마무리 작업
+    배포 환경 세팅 및 배포 : -
+    문서화 및 코드 정리 : -
+    종료 :milestone, 2024-12-15, 0d
 ```
 
 ## 사용된 기술 스택
@@ -55,14 +52,14 @@ gantt
 
 ### Key Results
 
-- 분석/설계 [o]
-- 기능 구현 [o]
-- 코딩 컨벤션 [o]
+- [x] 분석/설계
+- [x] 기능 구현
+- [x] 코딩 컨벤션
   - 네이밍 룰, 코드 스타일, 등 프론트엔드, 커밋 컨벤션 등 코드 전반에 관한 컨벤션 문서 작성
   - lint, prettier, husky 도입
-- 테스트 자동화 도구 도입/활용 []
-- 스토리북 도입 []
-- 배포 []
+- [] 테스트 자동화 도구 도입/활용
+- [] 스토리북 도입
+- [] 배포
 
 ### 프로젝트 구조
 
@@ -81,8 +78,8 @@ gantt
   - mypage
     - profile
     - info
-  - components
-    - ui
-  - lib
-  - types
-  - utils
+- components
+  - ui
+- lib
+- types
+- utils
