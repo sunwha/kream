@@ -75,6 +75,18 @@ export default function Page({ params }: { params: { id: string } }) {
               <span>좋아요 {data.like_count}개</span>
               <span>댓글 {data.comments.length}개</span>
             </div>
+            <div>
+              {data.tags.length > 0 && (
+                <ul>
+                  {data.tags.map((tag) => (
+                    <li key={tag}>
+                      <span>#{tag}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {data.content}
+            </div>
             {data.comments.length > 0 ? (
               <>
                 <ul>
@@ -86,6 +98,7 @@ export default function Page({ params }: { params: { id: string } }) {
                       <button>
                         <FavouriteIcon />
                       </button>
+                      <button>삭제</button>
                     </li>
                   ))}
                 </ul>
