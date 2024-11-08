@@ -65,11 +65,9 @@ gantt
 
 - app
   - (main)
-    - list
-    - detail
+    - [id]
     - upload
       - edit
-  - search
   - (account)
     - login
     - signup
@@ -80,6 +78,6 @@ gantt
     - info
 - components
   - ui
-- lib
+- libs
 - types
 - utils
