@@ -153,15 +153,18 @@ export default function Page({ params }: { params: { id: string } }) {
               </>
             ) : (
               !showCommentInput && (
-                <>
-                  <div>첫번째 댓글을 남겨보세요.</div>
+                <div className="flex flex-col gap-2 items-center justify-center h-32">
+                  <div className="text-xs text-gray-500">
+                    첫번째로 댓글을 남겨보세요.
+                  </div>
                   <button
                     type="button"
+                    className="text-[10px] border border-black rounded-lg px-2 py-1"
                     onClick={() => setShowCommentInput(true)}
                   >
-                    댓글 달기
+                    댓글쓰기
                   </button>
-                </>
+                </div>
               )
             )}
             {showCommentInput && (
