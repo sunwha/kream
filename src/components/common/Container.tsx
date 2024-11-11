@@ -12,7 +12,9 @@ export default function Container({
   isNavi = false,
 }: Props) {
   return (
-    <section className={cn("mb-8", isNavi && "pb-14", isHeader && "pt-14")}>
+    <section
+      className={cn("relative mb-8", isNavi && "pb-14", isHeader && "pt-14")}
+    >
       {children}
     </section>
   );

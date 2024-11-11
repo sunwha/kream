@@ -1,6 +1,7 @@
 "use client";
 import Container from "@/src/components/common/Container";
 import Navi from "@/src/components/common/Navi";
+import Nodata from "@/src/components/common/Nodata";
 import PostList from "@/src/components/list/PostList";
 import TagList from "@/src/components/list/TagList";
 import type { Post, PostResponse } from "@/src/types/post.types";
@@ -37,12 +38,16 @@ export default function Home() {
       <h1 className="sr-only">Home</h1>
       <main className="px-5">
         <TagList postList={postList} setSelectedTagList={setSelectedTagList} />
-        {selectedTagList ? (
-          <ul className="grid grid-cols-2 gap-2">
-            {selectedTagList.map((post: Post, index) => (
-              <PostList key={`taglist-${post.id}-${index}`} post={post} />
-            ))}
-          </ul>
+        {selectedTagList !== null ? (
+          selectedTagList.length > 0 ? (
+            <ul className="grid grid-cols-2 gap-2">
+              {selectedTagList.map((post: Post, index) => (
+                <PostList key={`taglist-${post.id}-${index}`} post={post} />
+              ))}
+            </ul>
+          ) : (
+            <Nodata />
+          )
         ) : (
           postList && (
             <ul className="grid grid-cols-2 gap-4">
