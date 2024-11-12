@@ -143,7 +143,7 @@ export default function Page({ params }: { params: { id: string } }) {
                       {/* <button>삭제</button> */}
                       <button
                         className="absolute top-[calc(50%-8px)] right-3 -translate-y-1/2"
-                        aria-lable="댓글 좋아요 클릭"
+                        aria-label="댓글 좋아요 클릭"
                       >
                         <FavouriteIcon className="text-gray-400" />
                       </button>
@@ -174,7 +174,7 @@ export default function Page({ params }: { params: { id: string } }) {
                     <li className="px-3">
                       <button
                         type="button"
-                        aria-lable="텍스트 바로 넣기"
+                        aria-label="텍스트 바로 넣기"
                         onClick={(e) => handleDirectText(e)}
                       >
                         좋아요❤️
@@ -183,7 +183,7 @@ export default function Page({ params }: { params: { id: string } }) {
                     <li className="px-3">
                       <button
                         type="button"
-                        aria-lable="텍스트 바로 넣기"
+                        aria-label="텍스트 바로 넣기"
                         onClick={(e) => handleDirectText(e)}
                       >
                         맞팔해요😊
@@ -192,7 +192,7 @@ export default function Page({ params }: { params: { id: string } }) {
                     <li className="px-3">
                       <button
                         type="button"
-                        aria-lable="텍스트 바로 넣기"
+                        aria-label="텍스트 바로 넣기"
                         onClick={(e) => handleDirectText(e)}
                       >
                         정보 부탁해요🙏
@@ -201,7 +201,7 @@ export default function Page({ params }: { params: { id: string } }) {
                     <li className="px-3">
                       <button
                         type="button"
-                        aria-lable="텍스트 바로 넣기"
+                        aria-label="텍스트 바로 넣기"
                         onClick={(e) => handleDirectText(e)}
                       >
                         평소 사이즈가 얼마예요?👀

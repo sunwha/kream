@@ -10,7 +10,7 @@ type Props = {
   isBack?: boolean;
   isHome?: boolean;
   isFunc?: string;
-  onClick?: () => void;
+  onFuncClick?: () => void;
 };
 export default function Header({
   title,
@@ -18,7 +18,7 @@ export default function Header({
   isBack = true,
   isHome = true,
   isFunc,
-  onClick,
+  onFuncClick,
 }: Props) {
   const router = useRouter();
   return (
@@ -51,7 +51,7 @@ export default function Header({
         <button
           type="button"
           className="w-12 h-14 flex justify-center items-center"
-          onClick={onClick}
+          onClick={onFuncClick}
         >
           {isFunc}
         </button>
