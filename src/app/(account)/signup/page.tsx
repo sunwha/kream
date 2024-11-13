@@ -1,34 +1,86 @@
+"use client";
 import Container from "@/src/components/common/Container";
 import Header from "@/src/components/common/Header";
-import { Button } from "@/src/components/ui/button";
+import InputBox from "@/src/components/common/InputBox";
+import { Input } from "@/src/components/ui";
+import { Button } from "@/src/components/ui/Button";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { PlusSignIcon } from "hugeicons-react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
 
+const formSchema = z.object({
+  email: z.string(),
+  password: z.string(),
+  size: z.number().optional(),
+  requiredTerm: z.boolean(),
+  optionalTerm: z.boolean().optional(),
+});
 export default function Page() {
+  const {
+    register,
+    resetField,
+    formState: { dirtyFields, errors },
+    handleSubmit,
+  } = useForm<z.infer<typeof formSchema>>({
+    mode: "onChange",
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      size: undefined,
+      requiredTerm: false,
+      optionalTerm: false,
+    },
+  });
+  const handleOnSubmit = (data: z.infer<typeof formSchema>) => {
+    console.log(data);
+  };
+
   return (
     <Container>
       <Header title="회원가입" isTitle={false} isHome={false} />
       <h2 className="px-5 py-12">
         <strong className="font-bold text-3xl">회원가입</strong>
       </h2>
-      <form action="">
+      <form onSubmit={handleSubmit(handleOnSubmit)}>
         <div className="flex flex-col gap-4 px-5">
-          <div className="flex flex-col gap-1">
-            <label htmlFor="email" className="text-xs">
-              이메일 주소
-            </label>
-            <input
-              type="email"
-              name="email"
-              id="email"
-              placeholder="이메일 주소"
-            />
-          </div>
-          <div className="mt-4 flex flex-col gap-1">
-            <label htmlFor="password" className="text-xs">
-              비밀번호
-            </label>
-            <input type="password" name="password" id="password" />
-          </div>
+          <InputBox
+            required
+            name="email"
+            label="이메일 주소"
+            placeholder="이메일 주소"
+            input={
+              <Input
+                {...register("email", { required: "이메일을 입력해주세요" })}
+                errors={errors.email}
+                resetField={resetField}
+                dirtyFields={dirtyFields.email}
+                type="email"
+                name="email"
+                id="email"
+                placeholder="이메일 주소"
+              />
+            }
+          />
+          <InputBox
+            required
+            name="password"
+            label="비밀번호"
+            placeholder=""
+            input={
+              <Input
+                {...register("password")}
+                errors={errors.password}
+                resetField={resetField}
+                dirtyFields={dirtyFields.password}
+                type="password"
+                name="password"
+                id="password"
+                placeholder=""
+              />
+            }
+          />
           <div>
             <span>신발사이즈</span>
             <div>선택하세요</div>

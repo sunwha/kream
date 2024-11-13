@@ -1,6 +1,6 @@
 import Container from "@/src/components/common/Container";
 import Header from "@/src/components/common/Header";
-import { Button } from "@/src/components/ui/button";
+import { Button } from "@/src/components/ui/Button";
 import Link from "next/link";
 
 export default function Page() {

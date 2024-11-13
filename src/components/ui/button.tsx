@@ -12,9 +12,9 @@ const sizeStyles: Record<ButtonProps["size"], CSSProperties> = {
   full: { fontSize: "24px", padding: "20px", width: "100%" },
 };
 
-export function Button<T>({
+export const Button = ({
   children,
   size,
-}: ButtonProps & ButtonHTMLAttributes<T>) {
+}: ButtonProps & ButtonHTMLAttributes<HTMLButtonElement>) => {
   return <button style={sizeStyles[size]}>{children}</button>;
-}
+};
