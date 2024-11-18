@@ -2,25 +2,35 @@
 import Container from "@/src/components/common/Container";
 import Header from "@/src/components/common/Header";
 import InputBox from "@/src/components/common/InputBox";
-import { Input } from "@/src/components/ui";
+import { Input, SquareCheckbox } from "@/src/components/ui";
+import { BottomBox } from "@/src/components/ui/BottomBox";
 import { Button } from "@/src/components/ui/Button";
+import useAllCheck from "@/src/hooks/useAllCheck";
+import { cn } from "@/src/utils/tailwind";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { PlusSignIcon } from "hugeicons-react";
+import { MinusSignIcon, PlusSignIcon } from "hugeicons-react";
+import { useRouter } from "next/router";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
 const formSchema = z.object({
-  email: z.string(),
-  password: z.string(),
-  size: z.number().optional(),
-  requiredTerm: z.boolean(),
-  optionalTerm: z.boolean().optional(),
+  email: z.string().email(),
+  password: z.string().min(6),
+  requiredTerms: z.boolean(),
 });
 export default function Page() {
+  const [termsCheck, setTermsCheck] = useAllCheck({
+    allTerms: false,
+    terms01: false,
+    terms02: false,
+  });
+  const [openList, setOpenList] = useState(false);
+  const router = useRouter();
   const {
     register,
     resetField,
-    formState: { dirtyFields, errors },
+    formState: { dirtyFields, errors, isValid, isDirty },
     handleSubmit,
   } = useForm<z.infer<typeof formSchema>>({
     mode: "onChange",
@@ -28,13 +38,32 @@ export default function Page() {
     defaultValues: {
       email: "",
       password: "",
-      size: undefined,
-      requiredTerm: false,
-      optionalTerm: false,
+      requiredTerms: termsCheck.allTerms,
     },
   });
-  const handleOnSubmit = (data: z.infer<typeof formSchema>) => {
-    console.log(data);
+
+  // 사용자 계정 생성
+  const handleOnSubmit = async (data: z.infer<typeof formSchema>) => {
+    await fetch("/api/users/signup", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+      },
+      body: JSON.stringify({
+        username: data.email.split("@")[0],
+        password: data.password,
+        email: data.email,
+      }),
+    }).then((res) => {
+      console.log("res", res);
+      if (res.ok) {
+        console.log("ok");
+        router.replace("/");
+      } else {
+        console.log("false");
+        // TODO:
+      }
+    });
   };
 
   return (
@@ -52,7 +81,7 @@ export default function Page() {
             placeholder="이메일 주소"
             input={
               <Input
-                {...register("email", { required: "이메일을 입력해주세요" })}
+                {...register("email", { required: true })}
                 errors={errors.email}
                 resetField={resetField}
                 dirtyFields={dirtyFields.email}
@@ -70,7 +99,7 @@ export default function Page() {
             placeholder=""
             input={
               <Input
-                {...register("password")}
+                {...register("password", { required: true })}
                 errors={errors.password}
                 resetField={resetField}
                 dirtyFields={dirtyFields.password}
@@ -81,29 +110,67 @@ export default function Page() {
               />
             }
           />
-          <div>
+          {/* <div>
             <span>신발사이즈</span>
             <div>선택하세요</div>
-          </div>
+          </div> */}
           <div>
             <ul>
               <li>
-                [필수] 만 14세 이상이며 모두 동의합니다.
-                <button type="button">
-                  <span className="sr-only">펼치기</span>
-                  <PlusSignIcon className="w-4 h-4" />
-                </button>
-                <ul>
-                  <li>
-                    이용약관 동의 <button type="button">내용 보기</button>
+                <div className="relative">
+                  <SquareCheckbox
+                    id="allTerms"
+                    {...register("requiredTerms", { required: true })}
+                    name="requiredTerms"
+                    label="[필수] 만 14세 이상이며 모두 동의합니다."
+                    checkValue={termsCheck}
+                    setCheckValue={setTermsCheck}
+                    allCheck
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-0 top-1/2 -translate-y-1/2"
+                    aria-label="약관 목록 펼치기"
+                    onClick={() => setOpenList(!openList)}
+                  >
+                    {!openList ? (
+                      <PlusSignIcon className="w-4 h-4" />
+                    ) : (
+                      <MinusSignIcon className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
+                <ul
+                  className={cn(
+                    "ml-8 mt-4 h-0 overflow-hidden transition-all opacity-0",
+                    openList && "h-auto opacity-100"
+                  )}
+                >
+                  <li className="flex justify-between items-center">
+                    <SquareCheckbox
+                      id="terms01"
+                      label="이용약관 동의"
+                      checkValue={termsCheck}
+                      setCheckValue={setTermsCheck}
+                    />
+                    <button type="button" className="underline text-xs">
+                      내용 보기
+                    </button>
                   </li>
-                  <li>
-                    개인정보 수집 및 이용 동의{" "}
-                    <button type="button">내용 보기</button>
+                  <li className="flex justify-between items-center mt-2">
+                    <SquareCheckbox
+                      id="terms02"
+                      label="개인정보 수집 및 이용 동의"
+                      checkValue={termsCheck}
+                      setCheckValue={setTermsCheck}
+                    />
+                    <button type="button" className="underline text-xs">
+                      내용 보기
+                    </button>
                   </li>
                 </ul>
               </li>
-              <li>
+              {/* <li>
                 [선택] 광고성 정보 수신에 모두 동의합니다.
                 <button type="button">
                   <span className="sr-only">펼치기</span>
@@ -114,12 +181,19 @@ export default function Page() {
                   <li>문자메시지</li>
                   <li>이메일</li>
                 </ul>
-              </li>
+              </li> */}
             </ul>
           </div>
-          <Button type="submit" size="full">
-            가입하기
-          </Button>
+          <BottomBox>
+            <Button
+              type="submit"
+              color="primary"
+              size="full"
+              disabled={!isDirty || !isValid || !termsCheck.allTerms}
+            >
+              가입하기
+            </Button>
+          </BottomBox>
         </div>
       </form>
     </Container>
