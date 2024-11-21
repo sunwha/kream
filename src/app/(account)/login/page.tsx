@@ -49,7 +49,7 @@ export default function Page() {
       if (response.ok) {
         useUserStore.setState({
           email: result.user.email,
-          token: result.user.id,
+          token: result.token,
         });
         router.replace("/");
       } else {

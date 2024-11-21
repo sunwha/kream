@@ -9,3 +9,12 @@ export interface SignupResponse {
   message: string;
   userId: string;
 }
+
+export interface UserResponse {
+  id: string;
+  username: string;
+  email: string;
+  roles: string[];
+  profile_image_id: string;
+  profile_image_url: string;
+}

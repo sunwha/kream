@@ -9,6 +9,7 @@ type Props = {
   isTitle?: boolean;
   isBack?: boolean;
   isHome?: boolean;
+  isBorder?: boolean;
   isFunc?: string;
   onFuncClick?: () => void;
 };
@@ -17,6 +18,7 @@ export default function Header({
   isTitle = true,
   isBack = true,
   isHome = true,
+  isBorder = true,
   isFunc,
   onFuncClick,
 }: Props) {
@@ -26,7 +28,8 @@ export default function Header({
       className={cn(
         "fixed top-0 w-full h-14 bg-white grid items-center grid-cols-[48px_1fr] justify-between border-b border-gray-100",
         isBack && (isHome || isFunc) && "grid-cols-[48px_1fr_48px]",
-        !isBack && (isHome || isFunc) && "grid-cols-[1fr_48px]"
+        !isBack && (isHome || isFunc) && "grid-cols-[1fr_48px]",
+        !isBorder && "border-none"
       )}
     >
       {isBack && (

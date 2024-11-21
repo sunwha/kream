@@ -1,4 +1,8 @@
-import { Camera01Icon, SunglassesIcon, UserAccountIcon } from "hugeicons-react";
+import {
+  Camera01Icon,
+  SunglassesIcon,
+  UserCircle02Icon,
+} from "hugeicons-react";
 import Link from "next/link";
 
 export default function Navi() {
@@ -29,7 +33,7 @@ export default function Navi() {
             className="flex justify-center items-center h-full"
             aria-label="My page"
           >
-            <UserAccountIcon />
+            <UserCircle02Icon />
           </Link>
         </li>
       </ul>
