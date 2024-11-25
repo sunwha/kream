@@ -39,13 +39,13 @@ export default function Page() {
       } else {
         console.log(result.message);
         openAlert({
-          title: "로그인 필요",
+          title: "로그인 필요한 페이지 진입",
           desc: "로그인을 해주세요.",
           isCancel: false,
           isConfirm: true,
           confirmAction: () => {
             closeAlert();
-            router.replace("/");
+            router.replace("/login");
           },
         });
       }

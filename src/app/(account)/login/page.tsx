@@ -4,6 +4,7 @@ import Header from "@/src/components/common/Header";
 import InputBox from "@/src/components/common/InputBox";
 import { Input } from "@/src/components/ui";
 import { Button } from "@/src/components/ui/Button";
+import { useAlertStore } from "@/src/context/useAlertStore";
 import { useUserStore } from "@/src/context/useUserStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
@@ -17,7 +18,9 @@ const formSchema = z.object({
 });
 export default function Page() {
   const router = useRouter();
+  const { openAlert, closeAlert } = useAlertStore();
   const {
+    reset,
     register,
     resetField,
     formState: { dirtyFields, errors, isValid, isDirty },
@@ -53,11 +56,27 @@ export default function Page() {
         });
         router.replace("/");
       } else {
-        console.log(result.message);
+        openAlert({
+          title: result.message,
+          desc: result.message,
+          isCancel: false,
+          confirmAction: () => {
+            closeAlert();
+            reset();
+          },
+        });
       }
     } catch (error) {
       console.error("Error:", error);
-      // TODO: 네트워크 오류 처리
+      openAlert({
+        title: "시스템 에러",
+        desc: "예기치 않은 문제가 발생했습니다. 다시 시도해주세요.",
+        isCancel: false,
+        confirmAction: () => {
+          closeAlert();
+          reset();
+        },
+      });
     }
   };
   return (
