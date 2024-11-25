@@ -24,10 +24,10 @@ export const useAlertStore = create<Props>((set) => ({
   openAlert: ({
     title,
     desc,
-    isCancel,
-    isConfirm,
-    cancelAction,
-    confirmAction,
+    isCancel = true,
+    isConfirm = true,
+    cancelAction = undefined,
+    confirmAction = undefined,
   }) =>
     set({
       isOpen: true,

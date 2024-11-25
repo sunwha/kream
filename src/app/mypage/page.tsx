@@ -1,6 +1,7 @@
 "use client";
 import Container from "@/src/components/common/Container";
 import Navi from "@/src/components/common/Navi";
+import { useAlertStore } from "@/src/context/useAlertStore";
 import { useUserStore } from "@/src/context/useUserStore";
 import { UserResponse } from "@/src/types/users.types";
 import { UserBlock01Icon } from "hugeicons-react";
@@ -12,6 +13,7 @@ export default function Page() {
   const [userInfo, setUserInfo] = useState<UserResponse | null>(null);
   const router = useRouter();
   const { email, token } = useUserStore();
+  const { openAlert, closeAlert } = useAlertStore();
 
   const handleProfileImg = () => {
     console.log("img");
@@ -36,10 +38,29 @@ export default function Page() {
         setUserInfo(result);
       } else {
         console.log(result.message);
-        router.replace("/");
+        openAlert({
+          title: "로그인 필요",
+          desc: "로그인을 해주세요.",
+          isCancel: false,
+          isConfirm: true,
+          confirmAction: () => {
+            closeAlert();
+            router.replace("/");
+          },
+        });
       }
     } catch (error) {
       console.log("error", error);
+      openAlert({
+        title: "시스템 에러",
+        desc: "예기치 않은 문제가 발생했습니다. 홈으로 이동합니다.",
+        isCancel: false,
+        isConfirm: true,
+        confirmAction: () => {
+          closeAlert();
+          router.replace("/");
+        },
+      });
     }
   };
 

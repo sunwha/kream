@@ -13,9 +13,15 @@ export default function Alert() {
     cancelAction,
     confirmAction,
   } = useAlertStore();
+
   useEffect(() => {
-    if (isOpen) setOpen(true);
-  }, []);
+    if (isOpen) {
+      setOpen(true);
+    } else {
+      setOpen(false);
+    }
+  }, [isOpen]);
+
   return (
     open && (
       <div className="fixed top-0 right-0 left-0 bottom-0 bg-black/60 z-[1000]">
@@ -26,20 +32,24 @@ export default function Alert() {
               <p className="text-sm">{desc}</p>
             </section>
             <div className="grid grid-cols-[repeat(auto-fit,minmax(50%,1fr))] h-full">
-              <button
-                type="button"
-                className="bg-gray-200 w-full"
-                onClick={cancelAction}
-              >
-                취소
-              </button>
-              <button
-                type="button"
-                className="bg-black text-white font-bold w-full"
-                onClick={confirmAction}
-              >
-                확인
-              </button>
+              {isCancel && (
+                <button
+                  type="button"
+                  className="bg-gray-200 w-full"
+                  onClick={cancelAction}
+                >
+                  취소
+                </button>
+              )}
+              {isConfirm && (
+                <button
+                  type="button"
+                  className="bg-black text-white font-bold w-full"
+                  onClick={confirmAction}
+                >
+                  확인
+                </button>
+              )}
             </div>
           </div>
         </div>
