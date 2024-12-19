@@ -4,69 +4,42 @@ import Header from "@/components/common/Header";
 import { Button } from "@/components/ui";
 import { cn } from "@/utils/tailwind";
 import { CancelCircleIcon } from "hugeicons-react";
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { ChangeEvent, useRef, useState } from "react";
 import { Cookies } from "react-cookie";
 
 export default function Page() {
-  const [imgUrls, setImgUrls] = useState<string[]>([]);
+  const [imgUrls, setImgUrls] = useState<File[]>([]);
   const [selectedTag, setSelectedTag] = useState<string[]>([]);
   const [selectedType, setSelectedType] = useState("");
   const [selectedStyle, setSelectedStyle] = useState("");
   const [contents, setContents] = useState({ title: "", content: "" });
 
-  const tags: { id: string; label: string }[] = [
-    { id: "tagWinter", label: "#겨울코디" },
-    { id: "tagStreet", label: "#스트릿템" },
-    { id: "tagTemps", label: "#일교차코디" },
-  ];
+  const tags: string[] = ["겨울코디", "스트릿템", "일교차코디"];
+  const types: string[] = ["남성", "여성"];
+  const styles: string[] = ["로맨틱", "모던", "빈티지", "스트릿", "스포티"];
 
-  const types: { id: string; label: string }[] = [
-    { id: "typeMale", label: "남성" },
-    { id: "typeFmale", label: "여성" },
-  ];
-
-  const styles: { id: string; label: string }[] = [
-    { id: "styleRomantic", label: "로맨틱" },
-    { id: "styleMorden", label: "모던" },
-    { id: "styleVintage", label: "빈티지" },
-    { id: "styleStreet", label: "스트릿" },
-    { id: "styleSporty", label: "스포티" },
-  ];
-
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const cookies = new Cookies();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // 태크 다중 선택
   const handleClickTag = (tag: string) => {
-    const target = tags.find((t) => t.id === tag);
+    const target = tags.find((t) => t === tag);
     if (!target) return;
 
     setSelectedTag((prev) => {
-      if (prev.includes(target.label)) {
-        return prev.filter((item) => item !== target.label);
+      if (prev.includes(target)) {
+        return prev.filter((item) => item !== target);
       } else {
-        return [...prev, target.label];
+        return [...prev, target];
       }
     });
   };
 
-  useEffect(() => {
-    console.log("selectedTag", selectedTag);
-  }, [selectedTag]);
-  // 성별 단일 선택
-  const handleClickType = (type: string) => {
-    setSelectedType(type);
-  };
-  // 스타일 단일 선택
-  const handleClickStyle = (style: string) => {
-    setSelectedStyle(style);
-  };
   // 이미지 업로드
   const handleImage = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       const files = Array.from(event.target.files);
-      const urls = files.map((file) => URL.createObjectURL(file));
-      setImgUrls(urls);
+      setImgUrls(files);
     }
   };
   // 이미지 업로드 실행 버튼
@@ -75,25 +48,41 @@ export default function Page() {
       fileInputRef.current.click();
     }
   };
-  const handleDeleteImage = (url: string) => {
-    setImgUrls((prev) => prev.filter((file) => file !== url));
+  const handleDeleteImage = (file: File) => {
+    setImgUrls((prev) => prev.filter((f) => f !== file));
   };
   const handleUpload = async () => {
     const formData = new FormData();
-    imgUrls.forEach((url, index) => {
-      const file = fileInputRef.current?.files?.[index];
-      if (file) {
-        formData.append("images", file);
+
+    if (imgUrls.length > 0) {
+      imgUrls.forEach((file) => {
+        formData.append("images", file, file.name);
+      });
+    } else {
+      console.log("no images");
+      return;
+    }
+    try {
+      const response = await fetch("/api/upload-imgs", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${cookies.get("userToken")}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        const errorText = await response.json(); // 오류 메시지 확인
+        throw new Error(
+          `HTTP error! status: ${response.status}, message: ${errorText}`
+        );
       }
-    });
 
-    formData.append("title", contents.title);
-    formData.append("content", contents.content);
-    formData.append("tags", JSON.stringify(selectedTag));
-    formData.append("type", selectedType);
-    formData.append("style", selectedStyle);
-
-    // console.log("selectedTag", selectedTag);
+      const data = await response.json();
+      console.log("Uploaded image URLs:", data);
+    } catch (error: any) {
+      console.error("Error uploading images:", error);
+    }
 
     // try {
     //   const response = await fetch("/api/posts", {
@@ -124,10 +113,10 @@ export default function Page() {
           {imgUrls.length > 0 ? (
             <ul className="pb-4 flex gap-2">
               {imgUrls.map((url, index) => (
-                <li className="relative" key={url + index}>
+                <li className="relative" key={url.name + index}>
                   <img
                     key={index}
-                    src={url}
+                    src={URL.createObjectURL(url)}
                     alt={`uploaded ${index}`}
                     className="w-20"
                   />
@@ -185,22 +174,19 @@ export default function Page() {
 
           <ul className="flex flex-row gap-2">
             {tags.map((tag) => (
-              <li key={tag.id}>
+              <li key={tag}>
                 <button
                   type="button"
-                  id={tag.id}
-                  onClick={() => handleClickTag(tag.id)}
+                  onClick={() => handleClickTag(tag)}
                   className={cn(
                     "rounded-full px-3 flex items-center justify-center border border-gray-300 text-xs font-bold h-8",
-                    selectedTag.find((item) => item === tag.label)
+                    selectedTag.find((item) => item === tag)
                       ? "border-black bg-black text-white"
                       : ""
                   )}
-                  aria-selected={
-                    !!selectedTag.find((item) => item === tag.label)
-                  }
+                  aria-selected={!!selectedTag.find((item) => item === tag)}
                 >
-                  {tag.label}
+                  #{tag}
                 </button>
               </li>
             ))}
@@ -210,20 +196,20 @@ export default function Page() {
           <h4 className="text-sm font-bold pb-2">유형</h4>
           <ul className="flex flex-row gap-2">
             {types.map((type) => (
-              <li key={type.id}>
+              <li key={type}>
                 <button
                   type="button"
-                  id={type.id}
-                  onClick={() => handleClickType(type.id)}
+                  id={type}
+                  onClick={() => setSelectedType(type)}
                   className={cn(
                     "rounded-full px-3 flex items-center justify-center border border-gray-300 text-xs h-8 text-gray-700",
-                    selectedType === type.id
+                    selectedType === type
                       ? "border-black bg-black text-white"
                       : ""
                   )}
-                  aria-selected={selectedType === type.id}
+                  aria-selected={selectedType === type}
                 >
-                  {type.label}
+                  {type}
                 </button>
               </li>
             ))}
@@ -231,20 +217,20 @@ export default function Page() {
           <h4 className="text-sm font-bold pb-2 mt-6">스타일</h4>
           <ul className="flex flex-row gap-2">
             {styles.map((style) => (
-              <li key={style.id}>
+              <li key={style}>
                 <button
                   type="button"
-                  id={style.id}
-                  onClick={() => handleClickStyle(style.id)}
+                  id={style}
+                  onClick={() => setSelectedStyle(style)}
                   className={cn(
                     "rounded-full px-3 flex items-center justify-center border border-gray-300 text-xs h-8 text-gray-700",
-                    selectedStyle === style.id
+                    selectedStyle === style
                       ? "border-black bg-black text-white"
                       : ""
                   )}
-                  aria-selected={selectedStyle === style.id}
+                  aria-selected={selectedStyle === style}
                 >
-                  {style.label}
+                  {style}
                 </button>
               </li>
             ))}
