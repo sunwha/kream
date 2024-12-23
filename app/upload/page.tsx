@@ -8,7 +8,13 @@ import { ChangeEvent, useRef, useState } from "react";
 import { Cookies } from "react-cookie";
 
 export default function Page() {
-  const [imgUrls, setImgUrls] = useState<File[]>([]);
+  const [uploadImages, setUploadImages] = useState<{
+    imageFiles: File[];
+    imageUrls: string[];
+  }>({
+    imageFiles: [],
+    imageUrls: [],
+  });
   const [selectedTag, setSelectedTag] = useState<string[]>([]);
   const [selectedType, setSelectedType] = useState("");
   const [selectedStyle, setSelectedStyle] = useState("");
@@ -37,10 +43,13 @@ export default function Page() {
 
   // 이미지 업로드
   const handleImage = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files) {
-      const files = Array.from(event.target.files);
-      setImgUrls(files);
-    }
+    if (!event.target.files) return;
+    const files = event.target.files;
+    const fileArray = Array.from(files);
+    setUploadImages((prev) => ({
+      ...prev,
+      imageFiles: [...prev.imageFiles, ...fileArray],
+    }));
   };
   // 이미지 업로드 실행 버튼
   const openFileUpload = () => {
@@ -49,21 +58,24 @@ export default function Page() {
     }
   };
   const handleDeleteImage = (file: File) => {
-    setImgUrls((prev) => prev.filter((f) => f !== file));
+    setUploadImages((prev) => ({
+      ...prev,
+      imageFiles: prev.imageFiles.filter((f) => f !== file),
+    }));
   };
   const handleUpload = async () => {
     const formData = new FormData();
 
-    if (imgUrls.length > 0) {
-      imgUrls.forEach((file) => {
-        formData.append("images", file, file.name);
+    if (uploadImages.imageFiles.length > 0) {
+      uploadImages.imageFiles.forEach((file) => {
+        formData.append("file", file);
       });
     } else {
       console.log("no images");
       return;
     }
     try {
-      const response = await fetch("/api/upload-imgs", {
+      const response = await fetch("/api/upload", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${cookies.get("userToken")}`,
@@ -72,18 +84,17 @@ export default function Page() {
       });
 
       if (!response.ok) {
-        const errorText = await response.json(); // 오류 메시지 확인
-        throw new Error(
-          `HTTP error! status: ${response.status}, message: ${errorText}`
-        );
+        const result = await response.json(); // 오류 메시지 확인
+        console.log("error", result.message);
       }
 
-      const data = await response.json();
-      console.log("Uploaded image URLs:", data);
+      const result = await response.json();
+      console.log("Uploaded image URLs:", result.file);
     } catch (error: any) {
       console.error("Error uploading images:", error);
     }
-
+  };
+  const handlePost = () => {
     // try {
     //   const response = await fetch("/api/posts", {
     //     method: "POST",
@@ -110,9 +121,9 @@ export default function Page() {
       />
       <div>
         <div className="px-5 pb-3 pt-5">
-          {imgUrls.length > 0 ? (
+          {uploadImages.imageFiles.length > 0 ? (
             <ul className="pb-4 flex gap-2">
-              {imgUrls.map((url, index) => (
+              {uploadImages.imageFiles.map((url, index) => (
                 <li className="relative" key={url.name + index}>
                   <img
                     key={index}
@@ -143,7 +154,7 @@ export default function Page() {
               </Button>
               <input
                 type="file"
-                multiple
+                name="file"
                 ref={fileInputRef}
                 onChange={handleImage}
                 className="hidden"
