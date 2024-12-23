@@ -5,7 +5,7 @@ import InputBox from "@//components/common/InputBox";
 import { Input } from "@//components/ui";
 import { Button } from "@//components/ui/Button";
 import { useAlertStore } from "@//context/useAlertStore";
-import { login } from "@/app/api/auth/auth";
+import { login } from "@/api/auth";
 import { useUserStore } from "@/context/useUserStore";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";

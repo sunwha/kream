@@ -1,75 +1,45 @@
 "use client";
+import { logout } from "@/api/auth";
 import Container from "@/components/common/Container";
 import Navi from "@/components/common/Navi";
-import { useAlertStore } from "@/context/useAlertStore";
-import { useUserStore } from "@/context/useUserStore";
-import { UserResponse } from "@/types/users.types";
+import { clearUserStore, useUserStore } from "@/context/useUserStore";
 import { UserBlock01Icon } from "hugeicons-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import { Cookies } from "react-cookie";
 
 export default function Page() {
-  const [userInfo, setUserInfo] = useState<UserResponse | null>(null);
+  const userInfo = useUserStore();
   const router = useRouter();
-  const { email } = useUserStore();
   const cookies = new Cookies();
-
-  const { openAlert, closeAlert } = useAlertStore();
 
   const handleProfileImg = () => {
     console.log("img");
   };
 
-  const handleLogout = () => {
-    console.log("logout");
-  };
-  const fetchUserInfo = async () => {
+  const handleLogout = async () => {
     try {
-      const response = await fetch(`/api/users/${email}`, {
-        method: "GET",
-        headers: {
-          Authorization: `Bearer ${cookies.get("userToken")}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await logout();
       const result = await response.json();
-
       if (response.ok) {
-        console.log(result);
-        setUserInfo(result);
-      } else {
         console.log(result.message);
-        openAlert({
-          title: "로그인 필요한 페이지 진입",
-          desc: "로그인을 해주세요.",
-          isCancel: false,
-          isConfirm: true,
-          confirmAction: () => {
-            closeAlert();
-            router.replace("/login");
-          },
+        useUserStore.setState({
+          id: "",
+          username: "",
+          email: "",
+          roles: [],
+          profile_image_id: "",
+          profile_image_url: "",
         });
+        clearUserStore();
+        cookies.remove("userToken");
+        router.replace("/");
       }
     } catch (error) {
-      console.log("error", error);
-      openAlert({
-        title: "시스템 에러",
-        desc: "예기치 않은 문제가 발생했습니다. 홈으로 이동합니다.",
-        isCancel: false,
-        isConfirm: true,
-        confirmAction: () => {
-          closeAlert();
-          router.replace("/");
-        },
-      });
+      console.error("Error:", error);
     }
   };
 
-  useEffect(() => {
-    fetchUserInfo();
-  }, []);
   return (
     <Container isHeader={false} isNavi={true}>
       <div className="px-5 pt-2 pb-4 border-b-8 border-b-gray-100">

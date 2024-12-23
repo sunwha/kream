@@ -12,6 +12,14 @@ export async function login(data: z.infer<typeof loginSchema>) {
       email: data.email,
       password: data.password,
     }),
+    credentials: "include",
+  });
+  return response;
+}
+
+export async function logout() {
+  const response = await fetch("/api/auth/logout", {
+    method: "GET",
   });
   return response;
 }

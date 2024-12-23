@@ -1,15 +1,16 @@
+import { UserResponse } from "@/types/users.types";
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 
-type Props = {
-  email: string;
-  id: string;
-};
 export const useUserStore = create(
-  persist<Props>(
+  persist<UserResponse>(
     (set) => ({
-      email: "",
       id: "",
+      username: "",
+      email: "",
+      roles: [],
+      profile_image_id: "",
+      profile_image_url: "",
     }),
     {
       name: "user-info",
@@ -17,3 +18,6 @@ export const useUserStore = create(
     }
   )
 );
+export const clearUserStore = () => {
+  sessionStorage.removeItem("user-info");
+};
