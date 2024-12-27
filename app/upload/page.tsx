@@ -1,31 +1,37 @@
 "use client";
+import { post } from "@/api/post";
 import Container from "@/components/common/Container";
 import Header from "@/components/common/Header";
 import { Button } from "@/components/ui";
+import { useAlertStore } from "@/context/useAlertStore";
 import { cn } from "@/utils/tailwind";
 import { CancelCircleIcon } from "hugeicons-react";
-import { ChangeEvent, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import { Cookies } from "react-cookie";
 
 export default function Page() {
   const [uploadImages, setUploadImages] = useState<{
     imageFiles: File[];
-    imageUrls: string[];
+    imageIds: string[];
   }>({
     imageFiles: [],
-    imageUrls: [],
+    imageIds: [],
   });
   const [selectedTag, setSelectedTag] = useState<string[]>([]);
   const [selectedType, setSelectedType] = useState("");
   const [selectedStyle, setSelectedStyle] = useState("");
   const [contents, setContents] = useState({ title: "", content: "" });
+  const [uploadSuccess, setUploadSuccess] = useState(false);
 
   const tags: string[] = ["겨울코디", "스트릿템", "일교차코디"];
-  const types: string[] = ["남성", "여성"];
+  const types: string[] = ["남", "여"];
   const styles: string[] = ["로맨틱", "모던", "빈티지", "스트릿", "스포티"];
 
   const cookies = new Cookies();
+  const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const { openAlert, closeAlert } = useAlertStore();
 
   // 태크 다중 선택
   const handleClickTag = (tag: string) => {
@@ -64,17 +70,15 @@ export default function Page() {
     }));
   };
   const handleUpload = async () => {
-    const formData = new FormData();
-
-    if (uploadImages.imageFiles.length > 0) {
-      uploadImages.imageFiles.forEach((file) => {
-        formData.append("file", file);
-      });
-    } else {
+    if (uploadImages.imageFiles.length === 0) {
       console.log("no images");
       return;
     }
-    try {
+
+    const uploadPromises = uploadImages.imageFiles.map(async (file) => {
+      const formData = new FormData();
+      formData.append("file", file);
+
       const response = await fetch("/api/upload", {
         method: "POST",
         headers: {
@@ -86,29 +90,83 @@ export default function Page() {
       if (!response.ok) {
         const result = await response.json(); // 오류 메시지 확인
         console.log("error", result.message);
+        throw new Error(result.message); // 오류 발생 시 예외 처리
       }
 
       const result = await response.json();
-      console.log("Uploaded image URLs:", result.file);
+      return result.file.id; // 성공적으로 업로드된 파일 ID 반환
+    });
+
+    try {
+      const imageIds = await Promise.all(uploadPromises); // 모든 업로드 요청 병렬 처리
+      setUploadImages((prev) => ({
+        ...prev,
+        imageIds: [...prev.imageIds, ...imageIds],
+      }));
+      setUploadSuccess(true);
     } catch (error: any) {
       console.error("Error uploading images:", error);
+      openAlert({
+        title: "이미지 업로드 오류",
+        desc: "이미지 업로드 오류입니다. 다시 시도해주세요.",
+        isCancel: false,
+        isConfirm: true,
+        confirmAction: () => {
+          closeAlert();
+        },
+      });
     }
   };
-  const handlePost = () => {
-    // try {
-    //   const response = await fetch("/api/posts", {
-    //     method: "POST",
-    //     headers: {
-    //       Authorization: `Bearer ${cookies.get("userToken")}`,
-    //     },
-    //     body: formData,
-    //   });
-    //   const data = await response.json();
-    //   console.log("Uploaded image URLs:", data.imageUrls);
-    //   // setImgUrls(data.imageUrls); // 서버에서 반환된 실제 이미지 URL로 업데이트
-    // } catch (error) {
-    //   console.error("Error uploading images:", error);
-    // }
+
+  useEffect(() => {
+    if (uploadSuccess) handlePost();
+  }, [uploadSuccess]);
+
+  const handlePost = async () => {
+    const request = {
+      title: contents.title,
+      content: contents.content,
+      tags: selectedTag,
+      file_ids: uploadImages.imageIds,
+      type: selectedType,
+      style: selectedStyle,
+    };
+    console.log("request", request);
+    try {
+      const response = await post({
+        request,
+        token: cookies.get("userToken"),
+      });
+      const result = await response.json();
+      if (response.ok) {
+        router.replace("/");
+      } else {
+        console.log(result.message);
+        openAlert({
+          title: "업로드 오류",
+          desc: "잠시 후에 다시 시도해 주세요. 홈으로 이동합니다.",
+          isCancel: false,
+          isConfirm: true,
+          confirmAction: () => {
+            closeAlert();
+            router.push("/");
+          },
+        });
+        return;
+      }
+    } catch (error) {
+      console.error("Error posting:", error);
+      openAlert({
+        title: "시스템 에러",
+        desc: "예기치 않은 문제가 발생했습니다. 홈으로 이동합니다.",
+        isCancel: false,
+        isConfirm: true,
+        confirmAction: () => {
+          closeAlert();
+          router.push("/");
+        },
+      });
+    }
   };
 
   return (
@@ -142,25 +200,24 @@ export default function Page() {
                 </li>
               ))}
             </ul>
-          ) : (
-            <>
-              <Button
-                type="button"
-                size="medium"
-                color="secondary"
-                onClick={openFileUpload}
-              >
-                이미지 업로드
-              </Button>
-              <input
-                type="file"
-                name="file"
-                ref={fileInputRef}
-                onChange={handleImage}
-                className="hidden"
-              />
-            </>
-          )}
+          ) : null}
+          <>
+            <Button
+              type="button"
+              size="medium"
+              color="secondary"
+              onClick={openFileUpload}
+            >
+              이미지 업로드
+            </Button>
+            <input
+              type="file"
+              name="file"
+              ref={fileInputRef}
+              onChange={handleImage}
+              className="hidden"
+            />
+          </>
           <input
             type="text"
             name="title"
