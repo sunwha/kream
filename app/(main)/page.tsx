@@ -28,7 +28,13 @@ export default function Home() {
   useEffect(() => {
     if (!isLoading) {
       if (data) {
-        setPostList((prev) => [...prev, ...data.posts]);
+        setPostList((prev) => {
+          const existingIds = new Set(prev.map((post) => post.id)); // 기존 게시물 ID 집합 생성
+          const newPosts = data.posts.filter(
+            (post) => !existingIds.has(post.id)
+          ); // 중복되지 않은 게시물 필터링
+          return [...prev, ...newPosts]; // 기존 게시물과 새로운 게시물 합치기
+        });
       }
     }
   }, [isLoading]);

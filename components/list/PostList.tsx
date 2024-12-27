@@ -31,7 +31,11 @@ export default function PostList({ post }: Props) {
         <div className="flex justify-between items-center pt-2">
           <strong className="text-sm">{post.username}</strong>
           <div className="flex items-center gap-1">
-            <FavoritePost id={post.id} iconSize="w-4" />
+            <FavoritePost
+              target_type="post"
+              target_id={post.id}
+              iconSize="w-4"
+            />
             <span className="text-sm">{post.like_count}</span>
           </div>
         </div>

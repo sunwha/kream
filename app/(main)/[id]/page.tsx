@@ -3,6 +3,7 @@ import "swiper/css";
 import "swiper/css/pagination";
 
 import Container from "@/components/common/Container";
+import FavoritePost from "@/components/common/FavoritePost";
 import Header from "@/components/common/Header";
 import { PostDetailResponse } from "@/types/post.types";
 import { useQuery } from "@tanstack/react-query";
@@ -89,9 +90,11 @@ export default function Page({ params }: { params: { id: string } }) {
           </div>
           <div>
             <div className="flex gap-4 px-5 h-12 items-center">
-              <button aria-label="좋아요 클릭" type="button">
-                <FavouriteIcon className="w-8 h-8" />
-              </button>
+              <FavoritePost
+                target_type="comment"
+                target_id={data.id}
+                iconSize="w-8 h-8"
+              />
               <button
                 aria-label="댓글 클릭"
                 type="button"
