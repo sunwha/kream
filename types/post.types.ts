@@ -68,3 +68,8 @@ export interface PostUploadRequest {
   type: string;
   style: string;
 }
+
+export interface LikeInfoRequest {
+  target_type: "post" | "comment";
+  target_id: string;
+}

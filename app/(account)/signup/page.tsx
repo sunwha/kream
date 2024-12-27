@@ -1,5 +1,5 @@
 "use client";
-import { signUp } from "@/api/auth";
+import { signUp } from "@/api/user";
 import Container from "@/components/common/Container";
 import Header from "@/components/common/Header";
 import InputBox from "@/components/common/InputBox";

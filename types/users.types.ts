@@ -24,3 +24,8 @@ export interface UserResponse {
   profile_image_id: string;
   profile_image_url: string;
 }
+
+export interface UpdateUserRequest {
+  username: string;
+  profile_image_id: string;
+}

@@ -1,4 +1,5 @@
 "use client";
+import { uploadFile } from "@/api/file";
 import { post } from "@/api/post";
 import Container from "@/components/common/Container";
 import Header from "@/components/common/Header";
@@ -78,22 +79,16 @@ export default function Page() {
     const uploadPromises = uploadImages.imageFiles.map(async (file) => {
       const formData = new FormData();
       formData.append("file", file);
-
-      const response = await fetch("/api/upload", {
-        method: "POST",
-        headers: {
-          Authorization: `Bearer ${cookies.get("userToken")}`,
-        },
-        body: formData,
+      const response = await uploadFile({
+        request: formData,
+        token: cookies.get("userToken"),
       });
 
+      const result = await response.json(); // 오류 메시지 확인
       if (!response.ok) {
-        const result = await response.json(); // 오류 메시지 확인
         console.log("error", result.message);
         throw new Error(result.message); // 오류 발생 시 예외 처리
       }
-
-      const result = await response.json();
       return result.file.id; // 성공적으로 업로드된 파일 ID 반환
     });
 
@@ -118,6 +113,7 @@ export default function Page() {
     }
   };
 
+  // 모든 이미지 업로드 요청, 받은 id 저장 후 post 진행
   useEffect(() => {
     if (uploadSuccess) handlePost();
   }, [uploadSuccess]);
