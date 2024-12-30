@@ -67,7 +67,7 @@ export default function Page() {
             <div className="flex flex-col justify-center">
               <strong>{userInfo.username}</strong>
               <span className="text-sm text-gray-400">{userInfo.email}</span>
-              <Link href="" className="mt-2">
+              <Link href="/mypage/profile" className="mt-2">
                 프로필 관리
               </Link>
             </div>
@@ -78,12 +78,18 @@ export default function Page() {
         <h3 className="font-bold">내 계정</h3>
         <ul className="flex flex-col mt-2">
           <li>
-            <Link href="" className="text-sm block py-4 tracking-tight">
+            <Link
+              href="/mypage/login-info"
+              className="text-sm block py-4 tracking-tight"
+            >
               로그인 정보
             </Link>
           </li>
           <li className="border-t border-t-gray-200">
-            <Link href="" className="text-sm block py-4 tracking-tight">
+            <Link
+              href="/mypage/profile"
+              className="text-sm block py-4 tracking-tight"
+            >
               프로필 관리
             </Link>
           </li>
