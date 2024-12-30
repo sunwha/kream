@@ -1,20 +1,27 @@
 "use client";
-import { getLikeInfo } from "@/api/post";
+import { commentLike, postLike } from "@/api/post";
 import { useAlertStore } from "@/context/useAlertStore";
+import { cn } from "@/utils/tailwind";
 import { FavouriteIcon } from "hugeicons-react";
 import { useRouter } from "next/navigation";
-import { MouseEvent } from "react";
+import { Dispatch, MouseEvent, SetStateAction } from "react";
 import { Cookies } from "react-cookie";
 
 type Props = {
-  target_type: "post" | "comment";
-  target_id: string;
+  className?: string;
+  id: string;
+  postId?: string;
   iconSize?: string;
+  setUpdate: Dispatch<SetStateAction<boolean>>;
+  myfavorite: boolean;
 };
 export default function FavoritePost({
-  target_type,
-  target_id,
+  className,
+  id,
+  postId,
   iconSize,
+  setUpdate,
+  myfavorite,
 }: Props) {
   const cookies = new Cookies();
   const { openAlert, closeAlert } = useAlertStore();
@@ -24,32 +31,59 @@ export default function FavoritePost({
   const handleLike = async (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     try {
-      const response = await getLikeInfo({
-        request: { target_type, target_id },
-        token: cookies.get("userToken"),
-      });
-      const result = await response.json();
-      if (response.ok) {
-        console.log("좋아요");
-        return;
-      } else {
-        console.log(result.message);
-        openAlert({
-          title: "좋아요 오류",
-          desc: result.message,
-          isCancel: false,
-          isConfirm: true,
-          confirmAction: () => {
-            closeAlert();
-          },
+      let response;
+      if (postId) {
+        // 댓글 좋아요일 때
+        response = await commentLike({
+          postId,
+          commentId: id,
+          token: cookies.get("userToken"),
         });
-        return;
+      } else {
+        // 글 좋아요일 때
+        response = await postLike({
+          id,
+          token: cookies.get("userToken"),
+        });
+      }
+      if (response) {
+        const result = await response.json();
+        if (response.ok) {
+          openAlert({
+            title: "좋아요 버튼 처리 완료",
+            desc: result.message,
+            isCancel: false,
+            isConfirm: true,
+            confirmAction: () => {
+              setUpdate(true);
+              closeAlert();
+            },
+          });
+          return;
+        } else {
+          console.log(result.message);
+          openAlert({
+            title: "좋아요 오류",
+            desc: result.message,
+            isCancel: false,
+            isConfirm: true,
+            confirmAction: () => {
+              closeAlert();
+            },
+          });
+          return;
+        }
       }
     } catch (error) {
       console.error("Error posting:", error);
       openAlert({
         title: "시스템 에러",
-        desc: "예기치 않은 문제가 발생했습니다. 홈으로 이동합니다.",
+        desc: (
+          <>
+            예기치 않은 문제가 발생했습니다. <br />
+            홈으로 이동합니다.
+          </>
+        ),
         isCancel: false,
         isConfirm: true,
         confirmAction: () => {
@@ -59,14 +93,15 @@ export default function FavoritePost({
       });
     }
   };
+
   return (
     <button
       type="button"
       aria-label="좋아요"
       onClick={(e: MouseEvent<HTMLButtonElement>) => handleLike(e)}
-      className="cursor-pointer"
+      className={cn("cursor-pointer", className)}
     >
-      <FavouriteIcon className={iconSize} />
+      <FavouriteIcon className={cn(iconSize, myfavorite && "text-red-500")} />
     </button>
   );
 }

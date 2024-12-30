@@ -4,14 +4,18 @@ import Navi from "@/components/common/Navi";
 import Nodata from "@/components/common/Nodata";
 import PostList from "@/components/list/PostList";
 import TagList from "@/components/list/TagList";
+import { useUserStore } from "@/context/useUserStore";
 import type { Post, PostResponse } from "@/types/post.types";
-import { useQuery } from "@tanstack/react-query";
+import { QueryClient, useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 
 export default function Home() {
+  const [update, setUpdate] = useState(false);
   const [request, setRequest] = useState({ page: 1, limit: 10 });
   const [postList, setPostList] = useState<Post[]>([]);
   const [selectedTagList, setSelectedTagList] = useState<Post[] | null>(null);
+  const queryClient = new QueryClient();
+  const { id: userId } = useUserStore();
 
   // 게시물 리스트 요청
   const { data, isLoading, refetch } = useQuery({
@@ -23,6 +27,20 @@ export default function Home() {
       return res.json() as Promise<PostResponse>;
     },
   });
+
+  useEffect(() => {
+    const handleUpdate = async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["posts"],
+      });
+      const { data } = await refetch();
+      if (data) setPostList(data.posts);
+    };
+    if (update) {
+      handleUpdate();
+      setUpdate(false);
+    }
+  }, [update]);
 
   // 게시물 리스트 요청 성공 시 게시물 리스트 상태 업데이트
   useEffect(() => {
@@ -48,7 +66,12 @@ export default function Home() {
           selectedTagList.length > 0 ? (
             <ul className="grid grid-cols-2 gap-2">
               {selectedTagList.map((post: Post, index) => (
-                <PostList key={`taglist-${post.id}-${index}`} post={post} />
+                <PostList
+                  key={`taglist-${post.id}-${index}`}
+                  post={post}
+                  setUpdate={setUpdate}
+                  userId={userId}
+                />
               ))}
             </ul>
           ) : (
@@ -58,7 +81,12 @@ export default function Home() {
           postList && (
             <ul className="grid grid-cols-2 gap-4">
               {postList.map((post: Post, index) => (
-                <PostList key={`postlist-${post.id}-${index}`} post={post} />
+                <PostList
+                  key={`postlist-${post.id}-${index}`}
+                  post={post}
+                  setUpdate={setUpdate}
+                  userId={userId}
+                />
               ))}
             </ul>
           )

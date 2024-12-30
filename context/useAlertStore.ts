@@ -2,7 +2,7 @@ import { create } from "zustand";
 
 interface IAlert {
   title: string;
-  desc: string;
+  desc: string | React.ReactNode;
   isCancel?: boolean;
   isConfirm?: boolean;
   cancelAction?: () => void;

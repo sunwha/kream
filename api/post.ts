@@ -53,7 +53,7 @@ export async function deletePost(data: { id: string; token: string }) {
 
 export async function postLike(data: { id: string; token: string }) {
   const { id, token } = data;
-  const response = await fetch(`/api/posts/${id}`, {
+  const response = await fetch(`/api/posts/${id}/like`, {
     method: "POST",
     headers: {
       Authorization: `Bearer ${token}`,

@@ -2,24 +2,39 @@
 import "swiper/css";
 import "swiper/css/pagination";
 
+import { postComments } from "@/api/post";
 import Container from "@/components/common/Container";
 import FavoritePost from "@/components/common/FavoritePost";
 import Header from "@/components/common/Header";
 import { PostDetailResponse } from "@/types/post.types";
-import { useQuery } from "@tanstack/react-query";
-import { differenceInDays } from "date-fns";
-import {
-  Comment02Icon,
-  FavouriteIcon,
-  MoreHorizontalCircle01Icon,
-} from "hugeicons-react";
-import { MouseEvent, useEffect, useState } from "react";
+import { QueryClient, useQuery } from "@tanstack/react-query";
+
+import CommentList from "@/components/list/CommentList";
+import { useUserStore } from "@/context/useUserStore";
+import { daysFromToday } from "@/utils/string";
+import { Comment02Icon, MoreHorizontalCircle01Icon } from "hugeicons-react";
+import { MouseEvent, useEffect, useRef, useState } from "react";
+import { Cookies } from "react-cookie";
 import { A11y, Pagination } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
 
 export default function Page({ params }: { params: { id: string } }) {
   const { id } = params;
+  const [update, setUpdate] = useState(false);
   const [showCommentInput, setShowCommentInput] = useState(false);
+  const [commentText, setCommentText] = useState("");
+
+  const queryClient = new QueryClient();
+  const cookies = new Cookies();
+  const commentInputRef = useRef<HTMLInputElement>(null);
+  const { id: userId } = useUserStore();
+
+  const directText = [
+    "좋아요❤️",
+    "맞팔해요",
+    "정보 부탁해요",
+    "평소 사이즈 어떻게 돼요?",
+  ];
 
   // 게시물 상세 요청
   const { data, isLoading, refetch } = useQuery({
@@ -30,21 +45,48 @@ export default function Page({ params }: { params: { id: string } }) {
     },
   });
 
-  function daysFromToday(dateString: string): number {
-    const inputDate = new Date(dateString);
-    const today = new Date();
-    return differenceInDays(today, inputDate);
-  }
-
   const handleComment = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    console.log("handleComment");
+    window.scroll({
+      top: document.body.scrollHeight,
+      behavior: "smooth",
+    });
+    commentInputRef.current?.focus();
   };
 
   const handleDirectText = (e: MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
-    console.log(e.currentTarget.textContent);
+    const text = e.currentTarget.textContent;
+    setCommentText((prev) => prev + text);
   };
+
+  const handleAddComment = async () => {
+    const response = await postComments({
+      id,
+      request: { content: commentText },
+      token: cookies.get("userToken"),
+    });
+    const result = await response.json();
+    if (response.ok) {
+      setUpdate(true);
+      setCommentText("");
+    } else {
+      console.log("error", result);
+    }
+  };
+
+  useEffect(() => {
+    const handleUpdate = async () => {
+      await queryClient.invalidateQueries({
+        queryKey: ["posts-detail", id],
+      });
+      await refetch();
+    };
+    if (update) {
+      handleUpdate();
+      setUpdate(false);
+    }
+  }, [update]);
 
   useEffect(() => {
     if (!isLoading && data) {
@@ -91,9 +133,10 @@ export default function Page({ params }: { params: { id: string } }) {
           <div>
             <div className="flex gap-4 px-5 h-12 items-center">
               <FavoritePost
-                target_type="comment"
-                target_id={data.id}
+                id={data.id}
                 iconSize="w-8 h-8"
+                setUpdate={setUpdate}
+                myfavorite={!!data.like_users.find((user) => user === userId)}
               />
               <button
                 aria-label="댓글 클릭"
@@ -124,33 +167,12 @@ export default function Page({ params }: { params: { id: string } }) {
               <>
                 <ul className="py-4 border-b border-gray-200 text-sm">
                   {data.comments.map((comment) => (
-                    <li
-                      key={comment.id}
-                      className="relative flex flex-col gap-1 pl-5 pr-11 py-2"
-                    >
-                      <div className="break-all">
-                        <strong className="mr-2">{comment.username}</strong>
-                        {comment.content}
-                      </div>
-                      <div className="text-xs text-gray-500 flex">
-                        <span className="after:content-['·'] after:mx-1">
-                          {comment.updated_at
-                            ? daysFromToday(comment.updated_at)
-                            : daysFromToday(comment.created_at)}
-                          일 전
-                        </span>
-                        <span>
-                          좋아요 <strong>{comment.like_count}</strong>개
-                        </span>
-                      </div>
-                      {/* <button>삭제</button> */}
-                      <button
-                        className="absolute top-[calc(50%-8px)] right-3 -translate-y-1/2"
-                        aria-label="댓글 좋아요 클릭"
-                      >
-                        <FavouriteIcon className="text-gray-400" />
-                      </button>
-                    </li>
+                    <CommentList
+                      userId={userId}
+                      postId={data.id}
+                      comment={comment}
+                      setUpdate={setUpdate}
+                    />
                   ))}
                 </ul>
               </>
@@ -174,52 +196,34 @@ export default function Page({ params }: { params: { id: string } }) {
               <div>
                 <div className="flex justify-between items-center truncate">
                   <ul className="flex whitespace-nowrap overflow-x-auto text-sm text-gray-700 py-4 px-2">
-                    <li className="px-3">
-                      <button
-                        type="button"
-                        aria-label="텍스트 바로 넣기"
-                        onClick={(e) => handleDirectText(e)}
-                      >
-                        좋아요❤️
-                      </button>
-                    </li>
-                    <li className="px-3">
-                      <button
-                        type="button"
-                        aria-label="텍스트 바로 넣기"
-                        onClick={(e) => handleDirectText(e)}
-                      >
-                        맞팔해요😊
-                      </button>
-                    </li>
-                    <li className="px-3">
-                      <button
-                        type="button"
-                        aria-label="텍스트 바로 넣기"
-                        onClick={(e) => handleDirectText(e)}
-                      >
-                        정보 부탁해요🙏
-                      </button>
-                    </li>
-                    <li className="px-3">
-                      <button
-                        type="button"
-                        aria-label="텍스트 바로 넣기"
-                        onClick={(e) => handleDirectText(e)}
-                      >
-                        평소 사이즈가 얼마예요?👀
-                      </button>
-                    </li>
+                    {directText.map((text) => (
+                      <li className="px-3" key={text}>
+                        <button
+                          type="button"
+                          aria-label="텍스트 바로 넣기"
+                          onClick={(e) => handleDirectText(e)}
+                        >
+                          {text}
+                        </button>
+                      </li>
+                    ))}
                   </ul>
                 </div>
                 <div className="px-5 pb-4 border-b border-gray-200">
                   <div className="grid grid-cols-[1fr_auto] bg-gray-100 rounded-full overflow-hidden border border-gray-200">
                     <input
                       type="text"
+                      value={commentText}
+                      ref={commentInputRef}
                       placeholder="댓글 달기..."
                       className="bg-transparent h-12 px-4 text-sm"
+                      onChange={(e) => setCommentText(e.target.value)}
                     />
-                    <button type="button" className="px-5 font-bold">
+                    <button
+                      type="button"
+                      className="px-5 font-bold"
+                      onClick={handleAddComment}
+                    >
                       등록
                     </button>
                   </div>

@@ -1,12 +1,15 @@
 import { Post } from "@/types/post.types";
 import { Album01Icon, ImageNotFound02Icon } from "hugeicons-react";
 import Link from "next/link";
+import { Dispatch, SetStateAction } from "react";
 import FavoritePost from "../common/FavoritePost";
 
 type Props = {
+  userId: string;
   post: Post;
+  setUpdate: Dispatch<SetStateAction<boolean>>;
 };
-export default function PostList({ post }: Props) {
+export default function PostList({ userId, post, setUpdate }: Props) {
   return (
     <li className="relative">
       <Link href={`/${post.id}`}>
@@ -32,9 +35,10 @@ export default function PostList({ post }: Props) {
           <strong className="text-sm">{post.username}</strong>
           <div className="flex items-center gap-1">
             <FavoritePost
-              target_type="post"
-              target_id={post.id}
+              id={post.id}
               iconSize="w-4"
+              setUpdate={setUpdate}
+              myfavorite={!!post.like_users.find((user) => user === userId)}
             />
             <span className="text-sm">{post.like_count}</span>
           </div>

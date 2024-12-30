@@ -5,16 +5,19 @@ type TFile = {
   uploaded_at: string;
 };
 
-type TComment = {
+export type TComment = {
   id: string;
+  idx: string;
+  user_id: string;
+  parent_id: string;
   content: string;
   views: number;
   created_at: string;
   updated_at: string;
   username: string;
   like_count: number;
-  tags: string[];
-  files: TFile[];
+  like_users: string[];
+  replies: string[];
 };
 
 export interface Post {
@@ -31,6 +34,7 @@ export interface Post {
   updated_at: string;
   username: string;
   like_count: number;
+  like_users: string[];
   tags: string[];
   files: TFile[];
 }
@@ -55,6 +59,7 @@ export interface PostDetailResponse {
   updated_at: string;
   username: string;
   like_count: number;
+  like_users: string[];
   tags: string[];
   files: TFile[];
   comments: TComment[];
