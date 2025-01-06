@@ -2,17 +2,15 @@
 import { getUserInfo } from "@/api/user";
 import { useAlertStore } from "@/context/useAlertStore";
 import { useUserStore } from "@/context/useUserStore";
-import {
-  Camera01Icon,
-  SunglassesIcon,
-  UserCircle02Icon,
-} from "hugeicons-react";
+import { cn } from "@/utils/tailwind";
+import { Camera01Icon, Home03Icon, UserCircle02Icon } from "hugeicons-react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Cookies } from "react-cookie";
 
 export default function Navi() {
   const router = useRouter();
+  const pathname = usePathname();
   const cookies = new Cookies();
   const { email } = useUserStore();
   const { openAlert, closeAlert } = useAlertStore();
@@ -63,7 +61,9 @@ export default function Navi() {
             className="h-full flex justify-center items-center"
             aria-label="Home"
           >
-            <SunglassesIcon />
+            <Home03Icon
+              className={cn("text-gray-500", pathname === "/" && "text-black")}
+            />
           </Link>
         </li>
         <li className="h-full">
@@ -73,7 +73,12 @@ export default function Navi() {
             aria-label="Upload post"
             onClick={() => handleCheckUser("upload")}
           >
-            <Camera01Icon />
+            <Camera01Icon
+              className={cn(
+                "text-gray-500",
+                pathname === "/upload" && "text-black"
+              )}
+            />
           </button>
         </li>
         <li className="h-full">
@@ -83,7 +88,12 @@ export default function Navi() {
             aria-label="My page"
             onClick={() => handleCheckUser("mypage")}
           >
-            <UserCircle02Icon />
+            <UserCircle02Icon
+              className={cn(
+                "text-gray-500",
+                pathname === "/mypage" && "text-black"
+              )}
+            />
           </button>
         </li>
       </ul>
