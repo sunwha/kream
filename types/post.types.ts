@@ -17,7 +17,25 @@ export type TComment = {
   username: string;
   like_count: number;
   like_users: string[];
-  replies: string[];
+  replies: TReply[];
+};
+
+export type TReply = {
+  id: string;
+  idx: number;
+  user_id: string;
+  parent_id: string;
+  title: string | null;
+  content: string;
+  type: string | null;
+  style: string | null;
+  views: number;
+  created_at: string;
+  updated_at: string;
+  username: string;
+  like_count: number;
+  like_users: string[];
+  replies: TReply[];
 };
 
 export interface Post {

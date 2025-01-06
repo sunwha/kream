@@ -165,13 +165,14 @@ export default function Page({ params }: { params: { id: string } }) {
             </div>
             {data.comments.length > 0 ? (
               <>
-                <ul className="py-4 border-b border-gray-200 text-sm">
+                <ul className="text-sm">
                   {data.comments.map((comment) => (
                     <CommentList
                       userId={userId}
                       postId={data.id}
                       comment={comment}
                       setUpdate={setUpdate}
+                      token={cookies.get("userToken")}
                     />
                   ))}
                 </ul>

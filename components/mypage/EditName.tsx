@@ -8,7 +8,7 @@ import {
   CheckmarkCircle01Icon,
   Edit02Icon,
 } from "hugeicons-react";
-import { ChangeEvent, useRef, useState } from "react";
+import { ChangeEvent, useState } from "react";
 
 type Props = {
   userInfo: UserResponse;
@@ -19,7 +19,6 @@ export default function EditName({ userInfo, token }: Props) {
   const [editedName, setEditedName] = useState(userInfo.username);
 
   const { openAlert, closeAlert } = useAlertStore();
-  const nameInputRef = useRef<HTMLInputElement | null>(null);
 
   const handleEdit = async () => {
     try {
@@ -76,12 +75,11 @@ export default function EditName({ userInfo, token }: Props) {
             type="text"
             className="border-b w-[100px]"
             value={editedName}
-            ref={nameInputRef}
             onChange={(e: ChangeEvent<HTMLInputElement>) => {
               setEditedName(e.target.value);
             }}
           />
-          <button onClick={handleEdit}>
+          <button type="button" aria-label="이름 수정" onClick={handleEdit}>
             <CheckmarkCircle01Icon className="w-4 h-4" />
           </button>
           <button
