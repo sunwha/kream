@@ -49,16 +49,7 @@ export default function FavoritePost({
       if (response) {
         const result = await response.json();
         if (response.ok) {
-          openAlert({
-            title: "좋아요 버튼 처리 완료",
-            desc: result.message,
-            isCancel: false,
-            isConfirm: true,
-            confirmAction: () => {
-              setUpdate(true);
-              closeAlert();
-            },
-          });
+          setUpdate(true);
           return;
         } else {
           console.log(result.message);

@@ -12,7 +12,11 @@ import { QueryClient, useQuery } from "@tanstack/react-query";
 import CommentList from "@/components/list/CommentList";
 import { useUserStore } from "@/context/useUserStore";
 import { daysFromToday } from "@/utils/string";
-import { Comment02Icon, MoreHorizontalCircle01Icon } from "hugeicons-react";
+import {
+  Cancel01Icon,
+  Comment02Icon,
+  MoreHorizontalCircle01Icon,
+} from "hugeicons-react";
 import { MouseEvent, useEffect, useRef, useState } from "react";
 import { Cookies } from "react-cookie";
 import { A11y, Pagination } from "swiper/modules";
@@ -23,6 +27,7 @@ export default function Page({ params }: { params: { id: string } }) {
   const [update, setUpdate] = useState(false);
   const [showCommentInput, setShowCommentInput] = useState(false);
   const [commentText, setCommentText] = useState("");
+  const [replyInfo, setReplyInfo] = useState({ id: "", username: "" });
 
   const queryClient = new QueryClient();
   const cookies = new Cookies();
@@ -60,9 +65,9 @@ export default function Page({ params }: { params: { id: string } }) {
     setCommentText((prev) => prev + text);
   };
 
-  const handleAddComment = async () => {
+  const handleAddComment = async (parentId: string) => {
     const response = await postComments({
-      id,
+      id: parentId,
       request: { content: commentText },
       token: cookies.get("userToken"),
     });
@@ -85,6 +90,7 @@ export default function Page({ params }: { params: { id: string } }) {
     if (update) {
       handleUpdate();
       setUpdate(false);
+      setReplyInfo({ id: "", username: "" });
     }
   }, [update]);
 
@@ -168,11 +174,14 @@ export default function Page({ params }: { params: { id: string } }) {
                 <ul className="text-sm">
                   {data.comments.map((comment) => (
                     <CommentList
+                      key={comment.id}
                       userId={userId}
                       postId={data.id}
                       comment={comment}
                       setUpdate={setUpdate}
                       token={cookies.get("userToken")}
+                      commentInputRef={commentInputRef}
+                      setReplyInfo={setReplyInfo}
                     />
                   ))}
                 </ul>
@@ -212,18 +221,41 @@ export default function Page({ params }: { params: { id: string } }) {
                 </div>
                 <div className="px-5 pb-4 border-b border-gray-200">
                   <div className="grid grid-cols-[1fr_auto] bg-gray-100 rounded-full overflow-hidden border border-gray-200">
-                    <input
-                      type="text"
-                      value={commentText}
-                      ref={commentInputRef}
-                      placeholder="댓글 달기..."
-                      className="bg-transparent h-12 px-4 text-sm"
-                      onChange={(e) => setCommentText(e.target.value)}
-                    />
+                    <div>
+                      {replyInfo.username && (
+                        <strong className="text-sm pl-5 flex items-center gap-1">
+                          @{replyInfo.username}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setReplyInfo({ id: "", username: "" });
+                            }}
+                          >
+                            <Cancel01Icon className="w-4 h-4" />
+                          </button>
+                        </strong>
+                      )}
+                      <input
+                        type="text"
+                        value={commentText}
+                        ref={commentInputRef}
+                        placeholder={
+                          replyInfo.id === ""
+                            ? "댓글 달기..."
+                            : "대댓글 달기..."
+                        }
+                        className="bg-transparent h-10 px-4 text-sm w-full"
+                        onChange={(e) => setCommentText(e.target.value)}
+                      />
+                    </div>
                     <button
                       type="button"
                       className="px-5 font-bold"
-                      onClick={handleAddComment}
+                      onClick={() =>
+                        handleAddComment(
+                          replyInfo.id !== "" ? replyInfo.id : id
+                        )
+                      }
                     >
                       등록
                     </button>
