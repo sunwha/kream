@@ -25,17 +25,17 @@ export default function Home() {
   const scrollPosition = useScrollPosition();
   const cookies = new Cookies();
 
-  const handleGetList = async (page: number) => {
+  const handleGetList = async () => {
     try {
       const response = await getPost({
-        request: { ...request, page },
+        request,
         token: cookies.get("userToken"),
       });
       const result = await response.json();
       setPostList((prev) => {
         const existingIds = new Set(prev.map((post) => post.id)); // 기존 게시물 ID 집합 생성
         const newPosts = result.posts.filter(
-          (post) => !existingIds.has(post.id)
+          (post: Post) => !existingIds.has(post.id)
         ); // 중복 제거
         return [...prev, ...newPosts]; // 중복이 제거된 새로운 게시물 추가
       });
@@ -47,7 +47,7 @@ export default function Home() {
 
   // 게시물 리스트 요청
   useEffect(() => {
-    handleGetList(1);
+    handleGetList();
   }, []);
 
   useEffect(() => {
@@ -58,17 +58,18 @@ export default function Home() {
   }, [scrollPosition]);
   // 게시물 리스트 요청
   useEffect(() => {
-    const fetchPosts = async () => {
-      if (request.page > 1) {
-        for (let i = 1; i <= request.page; i++) {
-          await handleGetList(i); // 각 페이지에 대해 호출
-        }
-      } else {
-        handleGetList(1); // 페이지가 1일 경우
-      }
-    };
+    // const fetchPosts = async () => {
+    //   if (request.page > 1) {
+    //     for (let i = 1; i <= request.page; i++) {
+    //       await handleGetList(i); // 각 페이지에 대해 호출
+    //     }
+    //   } else {
+    //     handleGetList(1); // 페이지가 1일 경우
+    //   }
+    // };
     if (update) {
-      fetchPosts();
+      // fetchPosts();
+      handleGetList();
       setUpdate(false);
     }
   }, [update]);
