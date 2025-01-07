@@ -1,4 +1,26 @@
-import { LikeInfoRequest, PostUploadRequest } from "@/types/post.types";
+import {
+  LikeInfoRequest,
+  PostListRequest,
+  PostUploadRequest,
+} from "@/types/post.types";
+
+export async function getPost(data: {
+  request: PostListRequest;
+  token: string;
+}) {
+  const { request, token } = data;
+  const response = await fetch(
+    `/api/posts?page=${request.page}&limit=${request.limit}&sortBy=${request.sortBy}`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+    }
+  );
+  return response;
+}
 
 export async function post(data: {
   request: PostUploadRequest;

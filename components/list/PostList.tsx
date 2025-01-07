@@ -13,7 +13,7 @@ export default function PostList({ userId, post, setUpdate }: Props) {
   return (
     <li className="relative">
       <Link href={`/${post.id}`}>
-        {post.files.length > 0 ? (
+        {post.files && post.files.length > 0 ? (
           <div className="min-h-[200px] rounded-lg overflow-hidden">
             {post.files.length > 1 && (
               <span className="absolute top-2 right-2">
@@ -38,12 +38,15 @@ export default function PostList({ userId, post, setUpdate }: Props) {
               id={post.id}
               iconSize="w-4"
               setUpdate={setUpdate}
-              myfavorite={!!post.like_users.find((user) => user === userId)}
+              myfavorite={
+                post.like_users &&
+                !!post.like_users.find((user) => user === userId)
+              }
             />
             <span className="text-sm">{post.like_count}</span>
           </div>
         </div>
-        {post.tags.length > 0 && (
+        {post.tags && post.tags.length > 0 && (
           <ul className="flex gap-1 pt-1 text-xs">
             {post.tags.map((tag: string, index: number) => (
               <li key={index}>#{tag}</li>

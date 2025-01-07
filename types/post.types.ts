@@ -96,3 +96,9 @@ export interface LikeInfoRequest {
   target_type: "post" | "comment";
   target_id: string;
 }
+
+export interface PostListRequest {
+  page: number;
+  limit: number;
+  sortBy: "latest" | "likes";
+}

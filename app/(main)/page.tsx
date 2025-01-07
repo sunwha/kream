@@ -1,61 +1,77 @@
 "use client";
+import { getPost } from "@/api/post";
 import Container from "@/components/common/Container";
 import Navi from "@/components/common/Navi";
 import Nodata from "@/components/common/Nodata";
 import PostList from "@/components/list/PostList";
 import TagList from "@/components/list/TagList";
 import { useUserStore } from "@/context/useUserStore";
-import type { Post, PostResponse } from "@/types/post.types";
-import { QueryClient, useQuery } from "@tanstack/react-query";
+import useScrollPosition from "@/hooks/useScrollPosition";
+import type { Post, PostListRequest } from "@/types/post.types";
 import { useEffect, useState } from "react";
+import { Cookies } from "react-cookie";
 
 export default function Home() {
   const [update, setUpdate] = useState(false);
-  const [request, setRequest] = useState({ page: 1, limit: 10 });
+  const [request, setRequest] = useState<PostListRequest>({
+    page: 1,
+    limit: 10,
+    sortBy: "latest",
+  });
   const [postList, setPostList] = useState<Post[]>([]);
+  const [nextPage, setNextPage] = useState(0);
   const [selectedTagList, setSelectedTagList] = useState<Post[] | null>(null);
-  const queryClient = new QueryClient();
   const { id: userId } = useUserStore();
+  const scrollPosition = useScrollPosition();
+  const cookies = new Cookies();
+
+  const handleGetList = async (page: number) => {
+    try {
+      const response = await getPost({
+        request: { ...request, page },
+        token: cookies.get("userToken"),
+      });
+      const result = await response.json();
+      setPostList((prev) => {
+        const existingIds = new Set(prev.map((post) => post.id)); // 기존 게시물 ID 집합 생성
+        const newPosts = result.posts.filter(
+          (post) => !existingIds.has(post.id)
+        ); // 중복 제거
+        return [...prev, ...newPosts]; // 중복이 제거된 새로운 게시물 추가
+      });
+      setNextPage(result.nextPage);
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
 
   // 게시물 리스트 요청
-  const { data, isLoading, refetch } = useQuery({
-    queryKey: ["posts"],
-    queryFn: async () => {
-      const res = await fetch(
-        `/api/posts?page=${request.page}&limit=${request.limit}`
-      );
-      return res.json() as Promise<PostResponse>;
-    },
-  });
+  useEffect(() => {
+    handleGetList(1);
+  }, []);
 
   useEffect(() => {
-    const handleUpdate = async () => {
-      await queryClient.invalidateQueries({
-        queryKey: ["posts"],
-      });
-      const { data } = await refetch();
-      if (data) setPostList(data.posts);
+    if (scrollPosition >= 100 && nextPage !== null) {
+      setRequest((prev) => ({ ...prev, page: nextPage }));
+      setUpdate(true);
+    }
+  }, [scrollPosition]);
+  // 게시물 리스트 요청
+  useEffect(() => {
+    const fetchPosts = async () => {
+      if (request.page > 1) {
+        for (let i = 1; i <= request.page; i++) {
+          await handleGetList(i); // 각 페이지에 대해 호출
+        }
+      } else {
+        handleGetList(1); // 페이지가 1일 경우
+      }
     };
     if (update) {
-      handleUpdate();
+      fetchPosts();
       setUpdate(false);
     }
   }, [update]);
-
-  // 게시물 리스트 요청 성공 시 게시물 리스트 상태 업데이트
-  useEffect(() => {
-    if (!isLoading) {
-      if (data) {
-        setPostList((prev) => {
-          const existingIds = new Set(prev.map((post) => post.id)); // 기존 게시물 ID 집합 생성
-          const newPosts = data.posts.filter(
-            (post) => !existingIds.has(post.id)
-          ); // 중복되지 않은 게시물 필터링
-          return [...prev, ...newPosts]; // 기존 게시물과 새로운 게시물 합치기
-        });
-      }
-    }
-  }, [isLoading]);
 
   return (
     <Container isHeader={false} isNavi>
