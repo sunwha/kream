@@ -54,16 +54,19 @@ export default function Navi() {
   };
   return (
     <nav className="fixed bottom-0 w-full">
-      <ul className="grid grid-cols-3 justify-between items-center h-14 bg-white shadow-[0_-2px_10px_0_rgba(0,0,0,0.1)]">
+      <ul className="grid grid-cols-3 justify-between items-center h-14 bg-white shadow-[0_-2px_10px_0_rgba(0,0,0,0.1)] rounded-t-xl">
         <li className="h-full">
           <Link
             href="/"
-            className="h-full flex justify-center items-center"
+            className="h-full flex justify-center items-center relative"
             aria-label="Home"
           >
             <Home03Icon
               className={cn("text-gray-500", pathname === "/" && "text-black")}
             />
+            {pathname === "/" && (
+              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-blue-300/30"></span>
+            )}
           </Link>
         </li>
         <li className="h-full">
@@ -79,6 +82,9 @@ export default function Navi() {
                 pathname === "/upload" && "text-black"
               )}
             />
+            {pathname === "/upload" && (
+              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-red-300/30"></span>
+            )}
           </button>
         </li>
         <li className="h-full">
@@ -94,6 +100,9 @@ export default function Navi() {
                 pathname === "/mypage" && "text-black"
               )}
             />
+            {pathname === "/mypage" && (
+              <span className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-red-300/30"></span>
+            )}
           </button>
         </li>
       </ul>

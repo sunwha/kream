@@ -1,8 +1,8 @@
 import { Post } from "@/types/post.types";
+import { daysFromToday } from "@/utils/string";
 import { Album01Icon, ImageNotFound02Icon } from "hugeicons-react";
 import Link from "next/link";
 import { Dispatch, SetStateAction } from "react";
-import FavoritePost from "../common/FavoritePost";
 
 type Props = {
   userId: string;
@@ -11,10 +11,10 @@ type Props = {
 };
 export default function PostList({ userId, post, setUpdate }: Props) {
   return (
-    <li className="relative">
+    <li className="relative rounded-xl overflow-hidden shadow-[0_5px_10px_rgba(0,0,0,0.2)] h-[200px]">
       <Link href={`/${post.id}`}>
         {post.files && post.files.length > 0 ? (
-          <div className="min-h-[200px] rounded-lg overflow-hidden">
+          <>
             {post.files.length > 1 && (
               <span className="absolute top-2 right-2">
                 <Album01Icon className="w-5 h-5" />
@@ -23,36 +23,21 @@ export default function PostList({ userId, post, setUpdate }: Props) {
             <img
               src={post.files[0]?.file_path}
               alt={post.title}
-              className="w-full"
+              className="w-full h-full object-cover"
             />
-          </div>
+          </>
         ) : (
-          <div className="min-h-[200px] flex justify-center items-center border border-gray-200 rounded-lg">
+          <div className="h-full flex justify-center items-center">
             <ImageNotFound02Icon />
           </div>
         )}
-        <div className="flex justify-between items-center pt-2">
-          <strong className="text-sm">{post.username}</strong>
-          <div className="flex items-center gap-1">
-            <FavoritePost
-              id={post.id}
-              iconSize="w-4"
-              setUpdate={setUpdate}
-              myfavorite={
-                post.like_users &&
-                !!post.like_users.find((user) => user === userId)
-              }
-            />
-            <span className="text-sm">{post.like_count}</span>
-          </div>
+        <div className="absolute bottom-1 px-2 text-white w-full truncate">
+          <strong className="text-base">{post.username}</strong>
+          <p className="text-xs">{daysFromToday(post.created_at)}일 전</p>
+          <span className="absolute bottom-4 right-2 text-white text-sm text-center px-2 rounded-full bg-blue-400">
+            {post.like_count}
+          </span>
         </div>
-        {post.tags && post.tags.length > 0 && (
-          <ul className="flex gap-1 pt-1 text-xs">
-            {post.tags.map((tag: string, index: number) => (
-              <li key={index}>#{tag}</li>
-            ))}
-          </ul>
-        )}
       </Link>
     </li>
   );
